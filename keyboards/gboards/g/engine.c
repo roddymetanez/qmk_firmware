@@ -52,6 +52,9 @@ uint16_t repTimer   = 0;
 bool   inMouse = false;
 int8_t mousePress;
 
+//Dictionary Check 
+uint16_t oldStick=0;
+
 // All processing done at chordUp goes through here
 void processKeysUp() {
     // Check for mousekeys, this is release
@@ -404,7 +407,24 @@ void REPEAT(void) {
     return;
 }
 void SET_STICKY(C_SIZE stick) {
-    stickyBits ^= stick;
+  	if (stickyBits==0)	    //deleted: stickyBits ^= stick;
+				{
+				stickyBits ^= stick; // if stickyBits is ALREADY zero then it gets passed thru as its either needed or its a zero sent by something else
+				} 
+			else if(stick > 0 && oldStick==stick) //its more than zero and its the same as before so back to layer 0
+				{
+				stickyBits = 0; 
+				}	
+			else if(stick > 0 && oldStick!=stick) // its more than 0 and not the same so reset the stickyBits and increment away
+				{
+				stickyBits ^= oldStick;
+				stickyBits ^= stick;
+				}	
+			else 
+				{
+				stickyBits = 0; // Failsafe back to 0
+				}
+			oldStick = stick;  //record the dictionary we are on right now for the future... 
     return;
 }
 void CLICK_MOUSE(uint8_t kc) {
